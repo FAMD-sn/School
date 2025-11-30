@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Javoni - Преподаватели</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* --- 1. Base Styling & Variables --- */
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #0b5ed7;
+  --text-color: #333;
+  --background-light: #f5f7fa;
+  --card-bg: #ffffff;
+  --shadow-default: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-hover: 0 8px 20px rgba(0,0,0,0.15);
+  --border-radius: 12px;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background: var(--background-light);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* --- 2. Header & Navigation --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: var(--primary-color);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Animated Menu Button */
+.menu {
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.3s ease;
+}
+.menu i { font-size: 26px; }
+
+.menu-buttons {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 65px;
+  right: 20px;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-default);
+  z-index: 1010;
+  min-width: 200px;
+  animation: slideDown 0.3s ease-out;
+}
+.menu-buttons.active { display: flex; }
+
+.menu-buttons a {
+  padding: 12px 20px;
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background-color 0.2s, color 0.2s;
+}
+.menu-buttons a:hover {
+  background-color: var(--background-light);
+  color: var(--primary-color);
+}
+.menu-buttons a:first-child { border-top-left-radius: var(--border-radius); border-top-right-radius: var(--border-radius); }
+.menu-buttons a:last-child { border-bottom: none; border-bottom-left-radius: var(--border-radius); border-bottom-right-radius: var(--border-radius); }
+
+/* --- 3. Filter Section --- */
+.filter {
+  padding: 15px 20px;
+  background: var(--card-bg);
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  position: sticky;
+  top: 60px; /* Below the header */
+  z-index: 900;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#subjectFilter {
+  padding: 8px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  appearance: none; /* Remove default arrow */
+  background: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d6efd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+  background-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+#subjectFilter:focus { border-color: var(--primary-color); outline: none; }
+.filter label { font-weight: 600; color: var(--secondary-color); }
+
+/* --- 4. Cards Layout & Animation --- */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 30px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--shadow-default);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27); /* Spring effect for visibility */
+  position: relative;
+  overflow: hidden;
+  border-left: 5px solid var(--primary-color);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-5px) scale(1.02);
+  transition: all 0.3s ease-out;
+}
+
+.card.visible { opacity: 1; transform: translateY(0); }
+
+.card-subject-ribbon {
+  position: absolute;
+  top: 0;
+  right: -10px;
+  background: var(--secondary-color);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 25px;
+  transform: rotate(45deg) translateY(-5px);
+  transform-origin: 100% 0;
+  z-index: 10;
+  width: 150px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.card h3 {
+  margin: 0 0 5px 0;
+  font-size: 20px;
+  color: var(--primary-color);
+  border-bottom: 2px solid #eee;
+  padding-bottom: 5px;
+}
+.card p { margin: 8px 0; font-size: 15px; }
+.card strong { font-weight: 700; color: var(--text-color); }
+
+.card-contact a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.card-contact a:hover { color: var(--secondary-color); text-decoration: underline; }
+
+.card button {
+  cursor: pointer;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 15px;
+  transition: background-color 0.2s, transform 0.1s;
+  width: 100%;
+}
+.card button:hover { background-color: var(--secondary-color); }
+.card button:active { transform: scale(0.98); }
+
+/* --- 5. Modal Styling --- */
+.modal {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px); /* Subtle blur effect */
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  max-width: 550px;
+  width: 90%;
+  position: relative;
+  box-shadow: var(--shadow-hover);
+  animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+}
+
+.modal-content h3 { color: var(--primary-color); margin-bottom: 15px; }
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 24px;
+  color: var(--text-color);
+  transition: color 0.2s, transform 0.2s;
+}
+.modal-close:hover { color: #dc3545; transform: rotate(90deg); }
+
+/* --- 6. New Features: Skeleton Loading & Back to Top --- */
+
+/* Skeleton Loader Animation */
+@keyframes pulse {
+  0% { background-color: rgba(200, 200, 200, 0.1); }
+  50% { background-color: rgba(200, 200, 200, 0.3); }
+  100% { background-color: rgba(200, 200, 200, 0.1); }
+}
+
+.skeleton-card {
+  height: 200px;
+  background: #e9e9e9;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--shadow-default);
+  animation: pulse 1.5s infinite ease-in-out;
+  position: relative;
+}
+
+.skeleton-line {
+  height: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  background-color: #d0d0d0;
+}
+.skeleton-line.title { width: 70%; height: 25px; margin-bottom: 15px; }
+.skeleton-line.short { width: 40%; }
+.skeleton-line.button { width: 100%; height: 40px; margin-top: 20px; }
+
+/* Back to Top Button */
+#backToTop {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: opacity 0.3s, background-color 0.3s, transform 0.3s;
+}
+#backToTop:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* --- 7. Keyframes & Media Queries --- */
+
+@keyframes fadeIn {
+  from {opacity:0; transform: scale(0.9);}
+  to {opacity:1; transform: scale(1);}
+}
+@keyframes slideDown {
+  from {opacity:0; transform: translateY(-10px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
+/* Responsiveness for smaller screens */
+@media (max-width: 600px) {
+  .header { padding: 15px; }
+  .header-title { font-size: 20px; }
+  .filter { flex-direction: column; top: 56px; }
+  .cards-container {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+  .card { padding: 15px; }
+  .card-subject-ribbon { font-size: 10px; width: 120px; }
+  .modal-content { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title"><i class="fas fa-graduation-cap"></i> Javoni</div>
+  <div class="menu" id="menuBtn"><i class="fas fa-bars"></i></div>
+  <div class="menu-buttons" id="menuButtons">
+    <a href="tel:87661999"><i class="fas fa-phone"></i> Связаться с нами</a>
+    <a href="https://dorosfamd.com/javoni"><i class="fas fa-info-circle"></i> О нас</a>
+    <a href="https://dorosfamd.com"><i class="fas fa-project-diagram"></i> Другие проекты</a>
+  </div>
+</div>
+
+<div class="filter">
+  <label for="subjectFilter"><i class="fas fa-filter"></i> Фильтр по предмету:</label>
+  <select id="subjectFilter">
+    <option value="">Все предметы</option>
+  </select>
+</div>
+
+<div class="cards-container" id="cardsContainer">
+  </div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <h3 id="modalName"></h3>
+    <p><strong><i class="fas fa-book"></i> Предмет:</strong> <span id="modalSubject"></span></p>
+    <p><strong><i class="fas fa-phone"></i> Телефон:</strong> <a id="modalPhone" href=""></a></p>
+    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+    <p style="white-space: pre-wrap;" id="modalDesc"></p>
+  </div>
+</div>
+
+<button onclick="window.scrollTo({top: 0, behavior: 'smooth'});" id="backToTop" title="Наверх">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+// --- Configuration ---
+const SHEET_ID = "1URFBXBQdpyAb2f17PbYb-kwuqMrJyN5xlpqSS9A43AU";
+const SHEET_NAME = "Лист1";
+const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+
+// --- DOM Elements ---
+const cardsContainer = document.getElementById("cardsContainer");
+const subjectFilter = document.getElementById("subjectFilter");
+const menuBtn = document.getElementById("menuBtn");
+const menuButtons = document.getElementById("menuButtons");
+const modal = document.getElementById("modal");
+const modalClose = document.getElementById("modalClose");
+const backToTop = document.getElementById("backToTop");
+
+let teachers = [];
+
+// --- Functions ---
+
+// 1. Skeleton Loading
+function renderSkeletons(count) {
+  cardsContainer.innerHTML = '';
+  for(let i = 0; i < count; i++) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "skeleton-card";
+    skeleton.innerHTML = `
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line button"></div>
+    `;
+    cardsContainer.appendChild(skeleton);
+  }
+}
+
+// 2. Data Fetching and Processing
+renderSkeletons(6); // Show 6 initial skeletons
+
+fetch(url)
+  .then(res => res.text())
+  .then(data => {
+    // Basic CSV parsing from your original script
+    const rows = data.split("\n").map(r => r.split(","));
+    const maxCol = rows[0].length;
+    for (let i = 0; i < maxCol; i++) {
+      const name = rows[0][i].replace(/"/g, '') || "";
+      const phone = rows[1][i].replace(/"/g, '') || "";
+      const desc = rows[2][i].replace(/"/g, '') || "";
+      const subject = rows[3][i].replace(/"/g, '') || "";
+      if(name) teachers.push({name, phone, desc, subject});
+    }
+    
+    // Once data is ready, populate and render
+    populateSubjects();
+    renderCards(teachers);
+  })
+  .catch(error => {
+    console.error("Error fetching data:", error);
+    cardsContainer.innerHTML = '<p style="text-align: center; color: red;">Не удалось загрузить данные преподавателей. Попробуйте обновить страницу.</p>';
+  });
+
+// 3. Populate Filter Dropdown
+function populateSubjects() {
+  const subjects = [...new Set(teachers.map(t => t.subject).filter(s => s))].sort();
+  subjects.forEach(s => {
+    const option = document.createElement("option");
+    option.value = s;
+    option.textContent = s;
+    subjectFilter.appendChild(option);
+  });
+}
+
+// 4. Render Cards
+function renderCards(list) {
+  cardsContainer.innerHTML = ""; // Clear existing content (skeletons or old cards)
+  if (list.length === 0) {
+    cardsContainer.innerHTML = '<p style="text-align: center; grid-column: 1 / -1; font-size: 1.2em; padding: 50px;">К сожалению, нет преподавателей по выбранному предмету.</p>';
+    return;
+  }
+  
+  list.forEach((t, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    
+    // Sanitize description for passing to JS function
+    const cleanDesc = t.desc.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+    
+    card.innerHTML = `
+      <div class="card-subject-ribbon">${t.subject}</div>
+      <h3><i class="fas fa-chalkboard-teacher"></i> ${t.name}</h3>
+      <div class="card-contact">
+        <p><strong><i class="fas fa-phone-alt"></i> Контакт:</strong> <a href="tel:${t.phone}">${t.phone}</a></p>
+      </div>
+      <button onclick="showModal('${t.name}','${t.subject}','${t.phone}','${cleanDesc}')">Подробнее</button>
+    `;
+    cardsContainer.appendChild(card);
+    
+    // Animation stagger
+    setTimeout(() => { card.classList.add("visible"); }, index * 120);
+  });
+}
+
+// 5. Modal Display
+function showModal(name, subject, phone, desc) {
+  document.getElementById("modalName").textContent = name;
+  document.getElementById("modalSubject").textContent = subject;
+  
+  const phoneLink = document.getElementById("modalPhone");
+  phoneLink.href = `tel:${phone}`;
+  phoneLink.textContent = phone;
+  
+  document.getElementById("modalDesc").textContent = desc;
+  modal.style.display = "flex";
+}
+
+// --- Event Listeners ---
+
+// Filter Change
+subjectFilter.addEventListener("change", function() {
+  const filterValue = this.value;
+  // Apply a subtle animation when filtering
+  cardsContainer.classList.add('fade-out');
+  setTimeout(() => {
+    const filtered = teachers.filter(t => !filterValue || t.subject === filterValue);
+    renderCards(filtered);
+    cardsContainer.classList.remove('fade-out');
+  }, 300); // Wait for fade-out to finish
+});
+
+// Menu Toggle
+menuBtn.addEventListener("click", () => {
+  menuButtons.classList.toggle("active");
+  // Change icon
+  menuBtn.querySelector('i').classList.toggle('fa-bars');
+  menuBtn.querySelector('i').classList.toggle('fa-times');
+});
+
+// Modal Close
+modalClose.addEventListener("click", () => { modal.style.display = "none"; });
+window.addEventListener("click", e => { if(e.target == modal) modal.style.display = "none"; });
+
+// Back to Top Visibility
+window.addEventListener('scroll', () => {
+  if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+    backToTop.style.display = "block";
+  } else {
+    backToTop.style.display = "none";
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Javoni Lyceum - Электронный журнал</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Сброс стилей и базовые настройки */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+        }
+
+        :root {
+            --primary: #007AFF;
+            --primary-dark: #0056CC;
+            --primary-light: rgba(0, 122, 255, 0.1);
+            --text: #1D1D1F;
+            --text-secondary: #86868B;
+            --text-light: #A1A1A6;
+            --background: #FFFFFF;
+            --surface: #F5F5F7;
+            --surface-dark: #E8E8ED;
+            --border: #D2D2D7;
+            --border-light: #E8E8ED;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.04);
+            --radius: 16px;
+            --radius-small: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Шапка сайта */
+        header {
+            background-color: var(--background);
+            padding: 18px 24px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            height: 44px;
+            width: auto;
+            border-radius: var(--radius-small);
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-text h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .teacher-info {
+            text-align: right;
+            padding: 8px 16px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+        }
+
+        .teacher-info p {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .teacher-info .class {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Меню */
+        .menu-button {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+        }
+
+        .menu-button:hover {
+            background: var(--surface-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .menu-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 340px;
+            height: 100%;
+            background-color: var(--background);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .menu-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .menu-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-menu {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text);
+            padding: 8px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-menu:hover {
+            background: var(--surface-dark);
+            transform: rotate(90deg);
+        }
+
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text);
+            transition: var(--transition);
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        .menu-item:hover {
+            background: var(--surface);
+            border-color: var(--border-light);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        /* Основной контент */
+        main {
+            padding: 28px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .subject-header {
+            margin-bottom: 28px;
+            padding: 24px;
+            background: var(--background);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+        }
+
+        .subject-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .teacher-name {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Таблица журнала */
+        .journal-container {
+            background-color: var(--background);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+
+        thead th {
+            background-color: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        tbody tr {
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 122, 255, 0.03);
+        }
+
+        .student-info {
+            position: sticky;
+            left: 0;
+            background-color: var(--background);
+            z-index: 5;
+            font-weight: 600;
+            border-right: 2px solid var(--border-light);
+        }
+
+        .student-number {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .quarter-header {
+            background: linear-gradient(135deg, var(--primary-light), rgba(0, 122, 255, 0.15));
+            color: var(--primary-dark);
+            font-weight: 700;
+        }
+
+        .quarter-cell {
+            background-color: var(--primary-light);
+            font-weight: 700;
+            color: var(--primary-dark);
+            position: relative;
+        }
+
+        .quarter-cell::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .grade-cell {
+            font-weight: 600;
+            position: relative;
+        }
+
+        .grade-high {
+            color: var(--success);
+        }
+
+        .grade-medium {
+            color: var(--warning);
+        }
+
+        .grade-low {
+            color: var(--danger);
+        }
+
+        .absent {
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .absent::before {
+            content: '\f183';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-right: 5px;
+        }
+
+        .empty-cell {
+            color: var(--text-light);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .loading p {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: var(--danger);
+        }
+
+        .error i {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .error p {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--background);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 500px;
+            padding: 28px;
+            position: relative;
+            border: 1px solid var(--border-light);
+            animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .close-modal {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text);
+            padding: 8px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: var(--surface-dark);
+            transform: rotate(90deg);
+        }
+
+        .subject-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .subject-btn {
+            padding: 18px 20px;
+            background-color: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .subject-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .subject-btn i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        /* Статистика */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--background);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 14px 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .header-text h1 {
+                font-size: 18px;
+            }
+            
+            .teacher-info {
+                order: 3;
+                width: 100%;
+                text-align: center;
+                margin-top: 8px;
+            }
+            
+            main {
+                padding: 16px;
+            }
+            
+            .subject-title {
+                font-size: 26px;
+            }
+            
+            th, td {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .menu-sidebar {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                height: 36px;
+            }
+            
+            .header-text h1 {
+                font-size: 16px;
+            }
+            
+            .subject-header {
+                padding: 20px;
+            }
+            
+            .subject-title {
+                font-size: 22px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+        }
+
+        /* Дополнительные улучшения */
+        .table-scroll-hint {
+            text-align: center;
+            padding: 12px;
+            background: var(--surface);
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: none;
+            border-top: 1px solid var(--border-light);
+        }
+
+        @media (max-width: 768px) {
+            .table-scroll-hint {
+                display: block;
+            }
+        }
+
+        .grade-cell.highlight {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(52, 199, 89, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.subject-btn {
+    background: #f5f5f5;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 13px;
+    transition: 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    height: 85px; /* компактные по высоте */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.subject-btn:hover {
+    background: #e8ffe8;
+    transform: scale(1.03);
+}
+
+.subject-btn i {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.subject-btn a {
+    text-decoration: none;
+    color: #000;
+    font-weight: 600;
+    font-size: 12px;
+    display: block;
+}
+
+/* Для маленьких телефонов */
+@media (max-width: 420px) {
+    .subjects-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .subject-btn {
+        height: 75px;
+        padding: 8px;
+    }
+
+    .subject-btn i {
+        font-size: 18px;
+    }
+
+    .subject-btn a {
+        font-size: 11px;
+    }
+}
+    
+    </style>
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header>
+        <div class="logo-container">
+            <img src="https://dorosfamd.com/logof.png" alt="Javoni Lyceum" class="logo">
+            <div class="header-text">
+                <h1>Javoni Lyceum</h1>
+                <p>Электронный журнал учащихся</p>
+            </div>
+        </div>
+        <div class="teacher-info">
+            <p>Mr.Amirolimkhon</p>
+            <p class="class">Класс: 9b</p>
+        </div>
+        <button class="menu-button" id="menuButton">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Основной контент -->
+    <main>
+        <div class="subject-header">
+            <h1 class="subject-title" id="subjectTitle">Загрузка...</h1>
+            <p class="teacher-name" id="teacherName">Преподаватель: Mr.Qwonch 92-123-4567</p>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-value" id="totalStudents">0</div>
+                <div class="stat-label">Всего учеников</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="averageGrade">0.00</div>
+                <div class="stat-label">Средний балл</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalLessons">0</div>
+                <div class="stat-label">Проведено уроков</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Успеваемость</div>
+            </div>
+        </div>
+
+        <div class="journal-container">
+            <div class="table-wrapper">
+                <table id="journalTable">
+                    <thead>
+                        <!-- Заголовки будут добавлены динамически -->
+                    </thead>
+                    <tbody>
+                        <!-- Данные будут добавлены динамически -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-scroll-hint">
+                <i class="fas fa-arrows-left-right"></i> Прокрутите таблицу для просмотра всех данных
+            </div>
+            <div class="loading" id="loadingMessage">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Загрузка данных журнала...</p>
+            </div>
+            <div class="error" id="errorMessage" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Ошибка загрузки данных. Проверьте доступ к таблице.</p>
+                <button class="subject-btn" id="retryButton" style="margin-top: 20px; justify-content: center;">
+                    <i class="fas fa-redo"></i> Попробовать снова
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Боковое меню -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="menu-sidebar" id="menuSidebar">
+        <div class="menu-header">
+            <h2>Меню</h2>
+            <button class="close-menu" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="menu-items">
+            <a href="https://dorosfamd.com" class="menu-item" target="_blank">
+                <i class="fas fa-project-diagram"></i>
+                <span>Проекты наших учеников</span>
+            </a>
+            <a href="tel:921234567" class="menu-item">
+                <i class="fas fa-phone"></i>
+                <span>Связаться с нами: 92-123-4567</span>
+            </a>
+            <a href="https://dorosfamd.com/javoni" class="menu-item" target="_blank">
+                <i class="fas fa-info-circle"></i>
+                <span>О нас</span>
+            </a>
+            <button class="menu-item" id="selectSubjectBtn">
+                <i class="fas fa-book"></i>
+                <span>Выбрать предмет</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора предмета -->
+    <div class="modal" id="subjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Выберите предмет</h2>
+                <button class="close-modal" id="closeSubjectModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="subject-buttons">
+
+<div class="subjects-grid">
+
+    <button class="subject-btn">
+        <i class="fas fa-language"></i>
+        <span><a href="https://dorosfamd.com/en">Английский (English)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-book-open"></i>
+        <span><a href="https://dorosfamd.com/ie">Подготовка к IELTS (IELTS)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-atom"></i>
+        <span><a href="https://dorosfamd.com/ph">Физика (Physics)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-flask"></i>
+        <span><a href="https://dorosfamd.com/ch">Химия (Chemistry)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-dna"></i>
+        <span><a href="https://dorosfamd.com/bi">Биология (Biology)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-leaf"></i>
+        <span><a href="https://dorosfamd.com/ec">Экология (Ecology)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-square-root-alt"></i>
+        <span><a href="https://dorosfamd.com/al">Алгебра (Algebra)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-shapes"></i>
+        <span><a href="https://dorosfamd.com/ge">Геометрия (Geometry)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-globe-americas"></i>
+        <span><a href="https://dorosfamd.com/gy">География (Geography)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-landmark"></i>
+        <span><a href="https://dorosfamd.com/hi">История (History)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-globe"></i>
+        <span><a href="https://dorosfamd.com/wh">Всемирная история (World History)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-book"></i>
+        <span><a href="https://dorosfamd.com/th">Таджикская история (Tajik History)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-pray"></i>
+        <span><a href="https://dorosfamd.com/rh">Религиозная история (Religious History)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-book-reader"></i>
+        <span><a href="https://dorosfamd.com/rl">Русская литература (Russian Literature)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-pen-nib"></i>
+        <span><a href="https://dorosfamd.com/ry">Русский язык (Russian Language)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-desktop"></i>
+        <span><a href="https://dorosfamd.com/ic">Информатика (ICT)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-tools"></i>
+        <span><a href="https://dorosfamd.com/cr">Труд / Технология (Craft)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-user-check"></i>
+        <span><a href="https://dorosfamd.com/be">Поведение (Behavior)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-paint-brush"></i>
+        <span><a href="https://dorosfamd.com/dr">Рисование (Drawing)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-running"></i>
+        <span><a href="https://dorosfamd.com/pe">Физкультура (PE)</a></span>
+    </button>
+
+    <button class="subject-btn">
+        <i class="fas fa-balance-scale"></i>
+        <span><a href="https://dorosfamd.com/la">Право (Law)</a></span>
+    </button>
+
+</div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ID Google Таблицы
+        const SHEET_ID = "1nP6dd79oXrY2aJy1mVr1MQI8hYi6dvVVbntcJ6v1g5k";
+        
+        // Переменные для хранения данных
+        let journalData = [];
+        let tableHeaders = [];
+        let currentSubject = "Алгебра"; // По умолчанию
+        
+        // Элементы DOM
+        const menuButton = document.getElementById('menuButton');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const menuSidebar = document.getElementById('menuSidebar');
+        const closeMenu = document.getElementById('closeMenu');
+        const selectSubjectBtn = document.getElementById('selectSubjectBtn');
+        const subjectModal = document.getElementById('subjectModal');
+        const closeSubjectModal = document.getElementById('closeSubjectModal');
+        const subjectButtons = document.querySelectorAll('.subject-btn');
+        const subjectTitle = document.getElementById('subjectTitle');
+        const teacherName = document.getElementById('teacherName');
+        const journalTable = document.getElementById('journalTable');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const retryButton = document.getElementById('retryButton');
+        const totalStudents = document.getElementById('totalStudents');
+        const averageGrade = document.getElementById('averageGrade');
+        const totalLessons = document.getElementById('totalLessons');
+        const successRate = document.getElementById('successRate');
+        
+        // Открытие/закрытие меню
+        menuButton.addEventListener('click', () => {
+            menuSidebar.classList.add('active');
+            menuOverlay.style.display = 'block';
+        });
+        
+        closeMenu.addEventListener('click', () => {
+            menuSidebar.classList.remove('active');
+            menuOverlay.style.display = 'none';
+        });
+        
+        menuOverlay.addEventListener('click', () => {
+            menuSidebar.classList.remove('active');
+            menuOverlay.style.display = 'none';
+        });
+        
+        // Открытие/закрытие модального окна выбора предмета
+        selectSubjectBtn.addEventListener('click', () => {
+            subjectModal.classList.add('active');
+            menuSidebar.classList.remove('active');
+            menuOverlay.style.display = 'none';
+        });
+        
+        closeSubjectModal.addEventListener('click', () => {
+            subjectModal.classList.remove('active');
+        });
+        
+        // Выбор предмета
+        subjectButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentSubject = button.getAttribute('data-subject');
+                subjectTitle.textContent = currentSubject;
+                subjectModal.classList.remove('active');
+                // Здесь можно добавить логику загрузки данных для выбранного предмета
+                // В данном примере используется одна таблица, но можно адаптировать для нескольких
+            });
+        });
+        
+        // Повторная попытка загрузки
+        retryButton.addEventListener('click', () => {
+            errorMessage.style.display = 'none';
+            loadingMessage.style.display = 'block';
+            loadJournalData();
+        });
+        
+        // Функция загрузки данных из Google Таблицы
+        async function loadJournalData() {
+            try {
+                // Формируем URL для получения данных из Google Таблицы
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?`;
+                
+                // Выполняем запрос
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки данных');
+                }
+                
+                const text = await response.text();
+                // Извлекаем JSON из ответа (убираем префикс)
+                const json = JSON.parse(text.substring(47).slice(0, -2));
+                
+                // Парсим данные
+                parseTableData(json);
+                
+                // Скрываем сообщение о загрузке и отображаем таблицу
+                loadingMessage.style.display = 'none';
+                renderJournalTable();
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                loadingMessage.style.display = 'none';
+                errorMessage.style.display = 'block';
+            }
+        }
+        
+        // Функция парсинга данных таблицы
+        function parseTableData(data) {
+            // Очищаем предыдущие данные
+            journalData = [];
+            tableHeaders = [];
+            
+            // Получаем строки данных
+            const rows = data.table.rows;
+            
+            // Парсим заголовки (первая строка)
+            const headerRow = rows[0];
+            for (let i = 0; i < headerRow.c.length; i++) {
+                if (headerRow.c[i]) {
+                    tableHeaders.push(headerRow.c[i].v || '');
+                } else {
+                    tableHeaders.push('');
+                }
+            }
+            
+            // Обновляем заголовок предмета и имя преподавателя
+            if (tableHeaders[1]) {
+                subjectTitle.textContent = tableHeaders[1];
+            }
+            
+            if (rows[1] && rows[1].c[0] && rows[1].c[0].v) {
+                teacherName.textContent = `Преподаватель: ${rows[1].c[0].v}`;
+            }
+            
+            // Парсим данные студентов (начиная с третьей строки)
+            for (let i = 2; i < rows.length; i++) {
+                const studentRow = rows[i];
+                const studentData = {
+                    number: studentRow.c[0] ? studentRow.c[0].v : '',
+                    name: studentRow.c[1] ? studentRow.c[1].v : '',
+                    grades: []
+                };
+                
+                // Добавляем оценки (начиная с третьего столбца)
+                for (let j = 2; j < studentRow.c.length; j++) {
+                    if (studentRow.c[j] && studentRow.c[j].v !== null) {
+                        studentData.grades.push(studentRow.c[j].v);
+                    } else {
+                        studentData.grades.push('');
+                    }
+                }
+                
+                journalData.push(studentData);
+            }
+        }
+        
+        // Функция вычисления четвертных оценок
+        function calculateQuarterGrades(studentGrades) {
+            const quarterGrades = {
+                q1: '-',
+                q2: '-',
+                q3: '-',
+                q4: '-'
+            };
+            
+            // Находим индексы четвертей в заголовках
+            const quarterIndices = {
+                q1: tableHeaders.indexOf('ч1'),
+                q2: tableHeaders.indexOf('ч2'),
+                q3: tableHeaders.indexOf('ч3'),
+                q4: tableHeaders.indexOf('ч4')
+            };
+            
+            // Вычисляем оценки для каждой четверти
+            for (const quarter in quarterIndices) {
+                const quarterIndex = quarterIndices[quarter];
+                if (quarterIndex === -1) continue;
+                
+                // Определяем диапазон оценок для этой четверти
+                let startIndex, endIndex;
+                
+                if (quarter === 'q1') {
+                    startIndex = 0; // Начало оценок
+                    endIndex = quarterIndex;
+                } else if (quarter === 'q2') {
+                    startIndex = quarterIndices.q1 !== -1 ? quarterIndices.q1 + 1 : 0;
+                    endIndex = quarterIndex;
+                } else if (quarter === 'q3') {
+                    startIndex = quarterIndices.q2 !== -1 ? quarterIndices.q2 + 1 : 0;
+                    endIndex = quarterIndex;
+                } else if (quarter === 'q4') {
+                    startIndex = quarterIndices.q3 !== -1 ? quarterIndices.q3 + 1 : 0;
+                    endIndex = quarterIndex;
+                }
+                
+                // Собираем оценки в диапазоне
+                const quarterGradesList = [];
+                for (let i = startIndex; i < endIndex; i++) {
+                    const grade = studentGrades[i];
+                    // Игнорируем пустые значения и 0 (отсутствие)
+                    if (grade !== '' && grade !== 0 && grade !== '0' && !isNaN(grade)) {
+                        quarterGradesList.push(Number(grade));
+                    }
+                }
+                
+                // Вычисляем среднее, если есть оценки
+                if (quarterGradesList.length > 0) {
+                    const sum = quarterGradesList.reduce((a, b) => a + b, 0);
+                    const average = sum / quarterGradesList.length;
+                    quarterGrades[quarter] = average.toFixed(2);
+                }
+            }
+            
+            return quarterGrades;
+        }
+        
+        // Функция рендеринга таблицы журнала
+        function renderJournalTable() {
+            const thead = journalTable.querySelector('thead');
+            const tbody = journalTable.querySelector('tbody');
+            
+            // Очищаем таблицу
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+            
+            // Создаем строку заголовков
+            const headerRow = document.createElement('tr');
+            
+            // Добавляем заголовки для номера и ФИО
+            const numberHeader = document.createElement('th');
+            numberHeader.textContent = '№';
+            numberHeader.classList.add('student-info');
+            headerRow.appendChild(numberHeader);
+            
+            const nameHeader = document.createElement('th');
+            nameHeader.textContent = 'ФИО ученика';
+            nameHeader.classList.add('student-info');
+            headerRow.appendChild(nameHeader);
+            
+            // Добавляем заголовки для дат и четвертей
+            for (let i = 2; i < tableHeaders.length; i++) {
+                const header = document.createElement('th');
+                
+                // Проверяем, является ли заголовок четвертью
+                if (tableHeaders[i] === 'ч1' || tableHeaders[i] === 'ч2' || 
+                    tableHeaders[i] === 'ч3' || tableHeaders[i] === 'ч4') {
+                    header.innerHTML = `<i class="fas fa-calculator"></i><br>${tableHeaders[i].toUpperCase()}`;
+                    header.classList.add('quarter-header');
+                } else {
+                    header.textContent = tableHeaders[i];
+                }
+                
+                headerRow.appendChild(header);
+            }
+            
+            thead.appendChild(headerRow);
+            
+            // Добавляем строки с данными студентов
+            journalData.forEach(student => {
+                const row = document.createElement('tr');
+                
+                // Добавляем номер и ФИО студента
+                const numberCell = document.createElement('td');
+                numberCell.textContent = student.number;
+                numberCell.classList.add('student-info', 'student-number');
+                row.appendChild(numberCell);
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = student.name;
+                nameCell.classList.add('student-info');
+                row.appendChild(nameCell);
+                
+                // Вычисляем четвертные оценки для этого студента
+                const quarterGrades = calculateQuarterGrades(student.grades);
+                
+                // Добавляем ячейки с оценками
+                for (let i = 0; i < student.grades.length; i++) {
+                    const gradeCell = document.createElement('td');
+                    const headerIndex = i + 2; // Смещение из-за номера и ФИО
+                    const gradeValue = student.grades[i];
+                    
+                    // Проверяем, является ли этот столбец четвертью
+                    if (tableHeaders[headerIndex] === 'ч1') {
+                        gradeCell.textContent = quarterGrades.q1;
+                        gradeCell.classList.add('quarter-cell');
+                    } else if (tableHeaders[headerIndex] === 'ч2') {
+                        gradeCell.textContent = quarterGrades.q2;
+                        gradeCell.classList.add('quarter-cell');
+                    } else if (tableHeaders[headerIndex] === 'ч3') {
+                        gradeCell.textContent = quarterGrades.q3;
+                        gradeCell.classList.add('quarter-cell');
+                    } else if (tableHeaders[headerIndex] === 'ч4') {
+                        gradeCell.textContent = quarterGrades.q4;
+                        gradeCell.classList.add('quarter-cell');
+                    } else {
+                        // Обычная оценка
+                        if (gradeValue === 0 || gradeValue === '0') {
+                            // Отсутствие - пустая ячейка с иконкой
+                            gradeCell.innerHTML = '<i class="fas fa-user-slash"></i>';
+                            gradeCell.classList.add('absent');
+                        } else if (gradeValue === '' || gradeValue === null) {
+                            // Пустая ячейка
+                            gradeCell.textContent = '';
+                            gradeCell.classList.add('empty-cell');
+                        } else {
+                            // Обычная оценка
+                            gradeCell.textContent = gradeValue;
+                            gradeCell.classList.add('grade-cell');
+                            
+                            // Добавляем классы для цветового кодирования оценок
+                            if (gradeValue >= 9) {
+                                gradeCell.classList.add('grade-high');
+                            } else if (gradeValue >= 7) {
+                                gradeCell.classList.add('grade-medium');
+                            } else if (gradeValue >= 1) {
+                                gradeCell.classList.add('grade-low');
+                            }
+                        }
+                    }
+                    
+                    row.appendChild(gradeCell);
+                }
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Функция обновления статистики
+        function updateStatistics() {
+            // Общее количество учеников
+            totalStudents.textContent = journalData.length;
+            
+            // Подсчет среднего балла
+            let totalGrades = 0;
+            let gradeCount = 0;
+            
+            journalData.forEach(student => {
+                student.grades.forEach(grade => {
+                    if (grade !== '' && grade !== 0 && grade !== '0' && !isNaN(grade)) {
+                        totalGrades += Number(grade);
+                        gradeCount++;
+                    }
+                });
+            });
+            
+            const avgGrade = gradeCount > 0 ? (totalGrades / gradeCount).toFixed(2) : '0.00';
+            averageGrade.textContent = avgGrade;
+            
+            // Количество проведенных уроков (столбцы с датами)
+            let lessonCount = 0;
+            for (let i = 2; i < tableHeaders.length; i++) {
+                if (!isNaN(tableHeaders[i]) || tableHeaders[i].match(/^\d+$/)) {
+                    lessonCount++;
+                }
+            }
+            totalLessons.textContent = lessonCount;
+            
+            // Процент успеваемости (ученики со средним баллом >= 7)
+            let successfulStudents = 0;
+            journalData.forEach(student => {
+                let studentTotal = 0;
+                let studentCount = 0;
+                
+                student.grades.forEach(grade => {
+                    if (grade !== '' && grade !== 0 && grade !== '0' && !isNaN(grade)) {
+                        studentTotal += Number(grade);
+                        studentCount++;
+                    }
+                });
+                
+                if (studentCount > 0 && (studentTotal / studentCount) >= 7) {
+                    successfulStudents++;
+                }
+            });
+            
+            const successPercentage = journalData.length > 0 
+                ? Math.round((successfulStudents / journalData.length) * 100) 
+                : 0;
+            successRate.textContent = `${successPercentage}%`;
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadJournalData();
+        });
+    </script>
+
+    <!-- ИНСТРУКЦИЯ ПО ИСПОЛЬЗОВАНИЮ -->
+    <!-- 
+    1. КАК СДЕЛАТЬ ТАБЛИЦУ ПУБЛИЧНОЙ:
+       - Откройте Google Таблицу в браузере
+       - Нажмите "Файл" -> "Поделиться" -> "Поделиться с другими"
+       - В разделе "Общий доступ" выберите "Все, у кого есть ссылка" с правами "Просмотр"
+       - Скопируйте ссылку и извлеките из неё ID таблицы (строка между /d/ и /edit)
+
+    2. КАК ЗАМЕНИТЬ SHEET_ID:
+       - Найдите в коде строку: const SHEET_ID = "1nP6dd79oXrY2aJy1mVr1MQI8hYi6dvVVbntcJ6v1g5k";
+       - Замените значение в кавычках на ID вашей таблицы
+
+    3. КАК ДОБАВИТЬ ПРЕДМЕТЫ В МЕНЮ:
+       - Найдите в HTML раздел с классом "subject-buttons"
+       - Добавьте новую кнопку с классом "subject-btn" и атрибутом data-subject="Название предмета"
+
+    4. КАК ПОМЕНЯТЬ ЦВЕТА:
+       - В разделе CSS найдите блок :root с переменными цветов
+       - Измените значения переменных:
+         --primary: основной цвет (синий по умолчанию)
+         --background: цвет фона
+         --surface: цвет поверхностей (карточек)
+         --text: цвет текста
+
+    5. КАК ОТКРЫТЬ ФАЙЛ В БРАУЗЕРЕ:
+       - Сохраните этот код в файл с расширением .html (например, journal.html)
+       - Откройте файл в любом современном браузере (Chrome, Firefox, Safari, Edge)
+       - Или запустите через локальный сервер для лучшей производительности
+
+    ИСПРАВЛЕНИЕ ОШИБКИ NaN:
+    - Ошибка была в функции calculateQuarterGrades - добавлена проверка !isNaN(grade)
+    - Теперь четвертные оценки рассчитываются корректно
+    -->
+</body>
+</html>

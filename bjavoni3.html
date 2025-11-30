@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Javoni Бухгалтерия</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-secondary: #555555;
+            --primary-blue: #007bff;
+            --danger-red: #dc3545;
+            --success-green: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 { margin: 0; font-size: 24px; color: var(--primary-blue); }
+
+        .stats { font-size: 18px; font-weight: bold; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input#searchInput {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            flex-grow: 1;
+            font-size: 16px;
+        }
+
+        button#notifyBtn {
+            padding: 12px 24px;
+            background-color: var(--danger-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button#notifyBtn:hover { background-color: #c82333; }
+        button#notifyBtn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-blue);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card.debtor { border-left-color: var(--danger-red); }
+        .card.paid-full { border-left-color: var(--success-green); }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .amount-row {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .debt-text { color: var(--danger-red); }
+        .paid-text { color: var(--success-green); }
+
+        #loading { text-align: center; padding: 50px; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Javoni Бухгалтерия</h1>
+            <small>Управление взносами</small>
+        </div>
+        <div class="stats">
+            Цель: <span id="targetAmountDisplay">0</span><br>
+            Собрано: <span id="totalCollected" style="color: green;">0</span>
+        </div>
+    </header>
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Поиск по имени...">
+        <button id="notifyBtn" onclick="sendNotifications()">📢 Отправить уведомления должникам</button>
+    </div>
+
+    <div id="loading">Загрузка данных из Google Таблиц...</div>
+    <div id="parentsGrid" class="grid"></div>
+</div>
+
+<script>
+    const SHEET_ID = '1AlGztdtPSZfSRTUwMuw-mJOcm29i_lIJDj_GXAVfVck';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+    const TG_BOT_TOKEN = '7505648334:AAE_thE4YU0dPZnr4ZuOJXcg71gon6arCDo';
+
+    const TARGET_AMOUNT_PER_PERSON = 15000;
+    let allParents = [];
+
+    async function init() {
+        await fetchData();
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetch(CSV_URL);
+            const data = await response.text();
+
+            const rows = data.split('\n').map(r => r.split(','));
+            const cleanRows = rows.slice(1);
+
+            allParents = cleanRows
+                .map(row => {
+                    if (!row[0] || row[0].trim() === "") return null;
+
+                    const name = row[0].replace(/"/g, '').trim();
+                    const phone = row[1] ? row[1].replace(/"/g, '').trim() : '';
+                    const tgId = row[2] ? row[2].replace(/"/g, '').trim() : '';
+                    const paid = parseFloat((row[3] || '0').replace(/"/g, '').replace(/\s/g, '').replace(',', '.')) || 0;
+
+                    return {
+                        name,
+                        phone,
+                        tgId,
+                        paid,
+                        debt: TARGET_AMOUNT_PER_PERSON - paid
+                    };
+                })
+                .filter(Boolean);
+
+            // === ВАЖНО: считаем родителей ===
+            const parentCount = allParents.length;
+            const totalTarget = parentCount * TARGET_AMOUNT_PER_PERSON;
+
+            document.getElementById('targetAmountDisplay').innerText =
+                `${TARGET_AMOUNT_PER_PERSON.toLocaleString()} × ${parentCount} = ${totalTarget.toLocaleString()} с.`;
+
+            renderParents(allParents);
+            calculateTotalStats();
+            document.getElementById('loading').style.display = 'none';
+
+        } catch (err) {
+            document.getElementById('loading').innerText = 'Ошибка загрузки данных.';
+            console.error(err);
+        }
+    }
+
+    function renderParents(parents) {
+        const grid = document.getElementById('parentsGrid');
+        grid.innerHTML = '';
+
+        parents.forEach(p => {
+            const card = document.createElement('div');
+            card.className = `card ${p.debt > 0 ? 'debtor' : 'paid-full'}`;
+
+            card.innerHTML = `
+                <h3>${p.name}</h3>
+                <div class="info-row"><span>Телефон:</span><span>${p.phone || '-'}</span></div>
+                <div class="info-row"><span>Telegram ID:</span><span>${p.tgId || '-'}</span></div>
+                <div class="amount-row"><span>Оплачено:</span><span>${p.paid.toLocaleString()} с.</span></div>
+                <div class="amount-row"><span>Долг:</span>
+                    <span class="${p.debt > 0 ? 'debt-text' : 'paid-text'}">
+                        ${p.debt > 0 ? p.debt.toLocaleString() + ' с.' : 'Оплачено'}
+                    </span>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    function calculateTotalStats() {
+        const totalPaid = allParents.reduce((s, p) => s + p.paid, 0);
+        document.getElementById('totalCollected').innerText = totalPaid.toLocaleString() + ' с.';
+    }
+
+    async function sendNotifications() {
+        const btn = document.getElementById('notifyBtn');
+        const debtors = allParents.filter(p => p.debt > 0 && p.tgId);
+
+        if (debtors.length === 0) {
+            alert("Нет должников с Telegram ID.");
+            return;
+        }
+
+        if (!confirm(`Отправить уведомления ${debtors.length} родителям?`)) return;
+
+        btn.disabled = true;
+        btn.innerText = "Отправка...";
+
+        for (const d of debtors) {
+            const msg = `
+⚠️ Уважаемый(ая) ${d.name}!
+
+Напоминаем о платеже в школу "Javoni"
+✅ Оплачено: ${d.paid} с.
+❗ Неоплачено: ${d.debt} с.
+Пожалуйста, внесите оплату.
+            `;
+
+            await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ chat_id: d.tgId, text: msg })
+            });
+
+            await new Promise(r => setTimeout(r, 300));
+        }
+
+        alert("Готово!");
+        btn.disabled = false;
+        btn.innerText = "📢 Отправить уведомления должникам";
+    }
+
+    init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Школьное дом.задание — Javoni</title>
+
+  <!-- Font Awesome 5 (fas fa-...) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-dyZ6gq6b...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Styles -->
+  
+  <style>
+/* style.css — современный Apple-like/Alif-like дизайн */
+/* Основные переменные — подбери по вкусу */
+:root{
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #0b8457;
+  --glass: rgba(255,255,255,0.6);
+  --shadow: 0 6px 18px rgba(16,24,40,0.08);
+  --radius: 18px;
+  --gap: 14px;
+}
+
+/* Сброс */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
+  color:#111827;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+
+/* Header */
+.app-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  position:sticky;
+  top:0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+  backdrop-filter: blur(8px);
+  z-index:40;
+  border-bottom:1px solid rgba(16,24,40,0.04);
+}
+.icon-btn{
+  border:0;
+  background:var(--card);
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s;
+}
+.icon-btn:active{transform:scale(.98)}
+.title-wrap{flex:1}
+.app-title{font-size:16px;margin:0}
+.subtitle{font-size:12px;color:var(--muted)}
+
+/* Side menu */
+.side-menu{
+  position:fixed;
+  left:-320px;
+  top:0;
+  width:320px;
+  height:100%;
+  background:linear-gradient(180deg,#fff,#f9fbff);
+  box-shadow: 10px 30px 60px rgba(7,12,20,0.12);
+  padding:18px;
+  border-top-right-radius:24px;
+  border-bottom-right-radius:24px;
+  z-index:60;
+  transition:left .34s cubic-bezier(.2,.9,.2,1);
+}
+.side-menu.open{left:0}
+.menu-top{display:flex;align-items:center;justify-content:space-between}
+.menu-list{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.menu-item{
+  display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;
+  text-decoration:none;color:#0f1724;font-weight:600;
+  transition:background .12s, transform .12s;
+  cursor:pointer;border:1px solid rgba(7,12,20,0.04);
+}
+.menu-item:hover{background:rgba(11,132,87,0.06);transform:translateX(6px)}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(6,7,8,0.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.visible{opacity:1;pointer-events:auto;}
+
+/* Container */
+.container{padding:18px;max-width:980px;margin:0 auto}
+
+/* Controls */
+.controls{margin-bottom:12px}
+.control-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.control{display:flex;align-items:center;gap:8px;background:var(--card);padding:8px 12px;border-radius:14px;box-shadow:var(--shadow)}
+.select{border:0;background:transparent;font-size:15px}
+.search-wrap{flex:1;display:flex;align-items:center;background:var(--card);padding:8px 12px;border-radius:14px;box-shadow:var(--shadow)}
+.search-wrap input{border:0;background:transparent;padding:8px;font-size:15px;width:100%}
+
+/* Status/skeleton */
+.status{margin:12px 0}
+.skeleton{display:flex;gap:12px}
+.sk-card{height:72px;border-radius:14px;background:linear-gradient(90deg,#eee,#f6f6f6,#eee);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Schedule container */
+.schedule-container{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+.day-block{background:var(--card);padding:12px;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transform-origin:top center;animation:cardIn .28s ease}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.995)} to{opacity:1;transform:none}}
+.day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.day-title{display:flex;align-items:center;gap:12px;font-weight:700}
+.lesson-list{display:flex;flex-direction:column;gap:10px}
+.lesson{
+  display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,1), rgba(249,251,255,0.9));
+  border:1px solid rgba(7,12,20,0.03);
+  transition:transform .14s, box-shadow .14s;
+}
+.lesson:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(7,12,20,0.06)}
+.lesson .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(180deg, rgba(11,132,87,0.12), rgba(11,132,87,0.06));font-size:18px}
+.lesson .text{flex:1}
+.lesson .title{font-weight:700}
+.lesson .sub{font-size:13px;color:var(--muted)}
+
+/* Footer */
+.app-footer{text-align:center;padding:12px;color:var(--muted);font-size:13px}
+
+/* Modal */
+.modal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(4,6,8,0.25);z-index:90}
+.modal-card{width:90%;max-width:520px;background:var(--card);padding:18px;border-radius:16px;box-shadow:var(--shadow)}
+.modal.hidden{display:none}
+
+/* Utility */
+.hidden{display:none}
+
+/* Responsive */
+@media (max-width:640px){
+  .side-menu{width:84%}
+  .app-title{font-size:15px}
+  .search-wrap{order:3;width:100%}
+  .control-row{gap:8px}
+}
+
+
+  </style>
+
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <button id="menuBtn" class="icon-btn"><i class="fas fa-bars"></i></button>
+    <div class="title-wrap">
+      <h1 class="app-title">Javoni</h1>
+      <div class="subtitle">Домашнее задание</div>
+    </div>
+
+    <div class="header-actions">
+      <button id="todayBtn" class="icon-btn" title="Сегодня"><i class="fas fa-calendar-day"></i></button>
+      <button id="refreshBtn" class="icon-btn" title="Обновить"><i class="fas fa-sync"></i></button>
+    </div>
+  </header>
+
+  <!-- Slide menu -->
+  <aside id="sideMenu" class="side-menu">
+    <div class="menu-top">
+      <h2>Меню</h2>
+      <button id="closeMenu" class="icon-btn"><i class="fas fa-times"></i></button>
+    </div>
+
+    <nav class="menu-list">
+      <a class="menu-item" href="tel:+992876619999"><i class="fas fa-phone"></i> Связаться</a>
+      <a class="menu-item" href="https://dorosfamd.com" target="_blank" rel="noopener"><i class="fas fa-globe"></i> Другие проекты</a>
+      <a class="menu-item" href="https://dorosfamd.com/javoni" target="_blank" rel="noopener"><i class="fas fa-book"></i> Электронный журнал</a>
+      <button id="aboutBtn" class="menu-item"><i class="fas fa-info-circle"></i> О приложении</button>
+    </nav>
+  </aside>
+
+  <!-- Overlay -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Main -->
+  <main class="container">
+    <!-- Controls -->
+    <section class="controls">
+      <div class="control-row">
+        <label class="control">
+          <i class="fas fa-chalkboard"></i>
+          <select id="classSelect" class="select"></select>
+        </label>
+
+        <label class="control">
+          <i class="fas fa-calendar-alt"></i>
+          <select id="daySelect" class="select">
+            <option value="all">Все дни</option>
+            <option value="пн">Пн</option>
+            <option value="вт">Вт</option>
+            <option value="ср">Ср</option>
+            <option value="чт">Чт</option>
+            <option value="пт">Пт</option>
+            <option value="сб">Сб</option>
+          </select>
+        </label>
+
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input id="searchInput" placeholder="Поиск уроков..." />
+        </div>
+      </div>
+    </section>
+
+    <!-- Status / skeleton -->
+    <section id="status" class="status">
+      <div id="skeleton" class="skeleton">
+        <div class="sk-card sk-1"></div>
+        <div class="sk-card sk-2"></div>
+        <div class="sk-card sk-3"></div>
+      </div>
+      <div id="message" class="message hidden"></div>
+    </section>
+
+    <!-- Schedule -->
+    <section id="scheduleContainer" class="schedule-container"></section>
+  </main>
+
+  <!-- Modal About -->
+  <div id="aboutModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>О приложении</h3>
+      <p>Автоматическое мобильное дом.задание школы. Интерфейс адаптирован для телефонов, использует Font Awesome и плавные анимации.</p>
+      <p><strong>Функции:</strong> фильтры по классу и дню, поиск, сегодня, офлайн-режим, обновление данных.</p>
+      <div class="modal-actions">
+        <button id="closeAbout" class="btn">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer small -->
+  <footer class="app-footer">© Javoni — дом.задание</footer>
+
+  <!-- Script -->
+  <script>
+/* script.js
+ - Парсит Google Sheets CSV и строит мобильное расписание.
+ - Настройки: SHEET_ID и SHEET_NAME.
+ - Использует Font Awesome (fas fa-...).
+ - Гибкий парсер: показывает только те дни, которые есть в таблице.
+*/
+
+/* ================== НАСТРОЙКИ ================== */
+/* Вставлена твоя таблица. Если сменится, заменяй SHEET_ID */
+const SHEET_ID = "13iscXonP4eKDHYsRxvQCfToGc_zR-3FXzv9RYmVMfm4";
+const SHEET_NAME = "Sheet1"; // если у тебя лист называется по-другому, укажи
+// Конечная ссылка формата CSV (работает если таблица доступна для чтения)
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+/* Ключевые селекторы */
+const classSelect = document.getElementById("classSelect");
+const daySelect = document.getElementById("daySelect");
+const searchInput = document.getElementById("searchInput");
+const scheduleContainer = document.getElementById("scheduleContainer");
+const skeleton = document.getElementById("skeleton");
+const messageEl = document.getElementById("message");
+const statusWrap = document.getElementById("status");
+const menuBtn = document.getElementById("menuBtn");
+const sideMenu = document.getElementById("sideMenu");
+const overlay = document.getElementById("overlay");
+const closeMenu = document.getElementById("closeMenu");
+const aboutModal = document.getElementById("aboutModal");
+const aboutBtn = document.getElementById("aboutBtn");
+const closeAbout = document.getElementById("closeAbout");
+const refreshBtn = document.getElementById("refreshBtn");
+const todayBtn = document.getElementById("todayBtn");
+
+/* Дни недели, которые считаем маркерами */
+const DAYS = ["пн","вт","ср","чт","пт","сб"];
+
+/* Хранилище расписания */
+let scheduleData = {}; // { "9б": { "пн": [...], "вт": [...] } }
+
+/* =========== УТИЛИТЫ =========== */
+
+/**
+ * Простой CSV парсер который корректно обрабатывает кавычки.
+ * Возвращает массив строк, каждая строка — массив ячеек.
+ */
+function parseCSV(text){
+  const rows = [];
+  const lines = text.split(/\r\n|\n/);
+  for (let r=0;r<lines.length;r++){
+    const line = lines[r];
+    if (line.trim()==="") { rows.push([]); continue; }
+    const cells = [];
+    let cur = "", inQuotes = false;
+    for (let i=0;i<line.length;i++){
+      const ch = line[i];
+      if (ch === '"' ) {
+        if (inQuotes && line[i+1] === '"') { // escaped quote
+          cur += '"'; i++; continue;
+        }
+        inQuotes = !inQuotes;
+        continue;
+      }
+      if (ch === ',' && !inQuotes) {
+        cells.push(cur);
+        cur = "";
+        continue;
+      }
+      cur += ch;
+    }
+    cells.push(cur);
+    rows.push(cells);
+  }
+  // Normalize row lengths
+  const maxCols = rows.reduce((m,r)=>Math.max(m,r.length),0);
+  for (const r of rows) while (r.length < maxCols) r.push("");
+  return rows;
+}
+
+/* Получить русский день недели (пн/вт...) для today */
+function getTodayShort(){
+  const d = new Date();
+  // В JS 0=Sun,1=Mon ...
+  const map = {1:"пн",2:"вт",3:"ср",4:"чт",5:"пт",6:"сб",0:"вс"};
+  return map[d.getDay()] || "пн";
+}
+
+/* Показать уведомление */
+function showMessage(txt, isError=false){
+  messageEl.textContent = txt;
+  messageEl.classList.remove("hidden");
+  messageEl.style.color = isError ? "#b91c1c" : "inherit";
+}
+
+/* Очистить сообщение */
+function clearMessage(){
+  messageEl.textContent = "";
+  messageEl.classList.add("hidden");
+}
+
+/* Проверка онлайн/оффлайн */
+function updateOnlineStatus(){
+  if (!navigator.onLine) {
+    showMessage("Нет соединения. Показаны локальные/кешированные данные (если есть).", true);
+  } else {
+    clearMessage();
+  }
+}
+
+/* =========== ПАРСИНГ ТАБЛИЦЫ =========== */
+
+/**
+ * Функция buildScheduleFromGrid
+ * rows — массив строк, каждая строка — массив ячеек
+ * Столбцы: в первой строке названия классов, под ними дни и уроки
+ */
+function buildScheduleFromGrid(rows){
+  scheduleData = {};
+  if (!rows || rows.length === 0) return scheduleData;
+  const header = rows[0];
+  const nCols = header.length;
+  const nRows = rows.length;
+
+  for (let col = 0; col < nCols; col++){
+    const className = (header[col] || "").trim();
+    if (!className) continue; // пустой столбец — пропускаем
+    scheduleData[className] = {};
+    let currentDay = null;
+
+    // Проходим строки начиная со второй (index 1)
+    for (let r = 1; r < nRows; r++){
+      const cell = String(rows[r][col] || "").trim();
+      if (!cell) continue; // пустая ячейка — пропускаем
+
+      const lc = cell.toLowerCase();
+      // Если ячейка совпадает с днём недели — переключаем текущий день
+      if (DAYS.includes(lc)){
+        currentDay = lc;
+        if (!scheduleData[className][currentDay]) scheduleData[className][currentDay] = [];
+      } else {
+        // Если пока не встречали день — пропускаем (или можно поместить в "без дня")
+        if (!currentDay){
+          // игнорируем уроки, если перед ними не указан день (можно изменить поведение)
+          continue;
+        }
+        scheduleData[className][currentDay].push(cell);
+      }
+    }
+  }
+  return scheduleData;
+}
+
+/* =========== РЕНДЕР =========== */
+
+function clearScheduleView(){
+  scheduleContainer.innerHTML = "";
+}
+
+/* Создать DOM карточку урока */
+function createLessonElement(text, index){
+  const li = document.createElement("div");
+  li.className = "lesson";
+  li.innerHTML = `
+    <div class="ico"><i class="fas fa-book"></i></div>
+    <div class="text">
+      <div class="title">${escapeHtml(text)}</div>
+      <div class="sub">Урок ${index+1}</div>
+    </div>
+  `;
+  return li;
+}
+
+/* Создать блок дня (с заголовком и списком уроков) */
+function createDayBlock(dayKey, lessons){
+  const block = document.createElement("div");
+  block.className = "day-block";
+  const dayTitle = dayKey.toUpperCase();
+  const count = lessons.length;
+  block.innerHTML = `
+    <div class="day-header">
+      <div class="day-title"><i class="fas fa-list"></i> ${dayTitle}</div>
+      <div class="day-meta">${count} ${declOfNum(count, ['урок','урока','уроков'])}</div>
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.className = "lesson-list";
+  lessons.forEach((ls,i)=>list.appendChild(createLessonElement(ls,i)));
+  block.appendChild(list);
+  return block;
+}
+
+/* Экранирование HTML для безопасности */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+  });
+}
+
+/* Склонение слов (русский) */
+function declOfNum(n, titles) {
+  n = Math.abs(n) % 100;
+  const n1 = n % 10;
+  if (n > 10 && n < 20) return titles[2];
+  if (n1 > 1 && n1 < 5) return titles[1];
+  if (n1 == 1) return titles[0];
+  return titles[2];
+}
+
+/* Рисуем расписание в зависимости от фильтров */
+function renderSchedule(){
+  clearScheduleView();
+
+  const selectedClass = classSelect.value;
+  const selectedDay = daySelect.value;
+  const query = (searchInput.value || "").trim().toLowerCase();
+
+  if (!selectedClass || !scheduleData[selectedClass]) {
+    showMessage("Выберите класс (или обновите данные).");
+    return;
+  }
+  clearMessage();
+
+  const classData = scheduleData[selectedClass];
+  // daysToShow: если выбран "all" — все ключи объекта (в порядке DAYS), иначе только выбранный
+  let daysToShow;
+  if (selectedDay === "all") {
+    // сохраняем порядок согласно DAYS, но показываем только те, которые есть
+    daysToShow = DAYS.filter(d=>classData[d] && classData[d].length>0);
+    // Если в таблице есть другие нестандартные дни — добавим их тоже
+    const otherDays = Object.keys(classData).filter(d=>!DAYS.includes(d));
+    daysToShow = daysToShow.concat(otherDays);
+  } else {
+    daysToShow = classData[selectedDay] ? [selectedDay] : [];
+  }
+
+  if (daysToShow.length === 0){
+    showMessage("Для выбранного класса нет уроков (или отсутствуют пометки дней).");
+    return;
+  }
+
+  // Для каждого дня — выводим блок
+  daysToShow.forEach(dayKey => {
+    let lessons = classData[dayKey] || [];
+    // фильтр поиска
+    if (query) lessons = lessons.filter(l => l.toLowerCase().includes(query));
+    if (lessons.length === 0) return;
+    const block = createDayBlock(dayKey, lessons);
+    scheduleContainer.appendChild(block);
+  });
+}
+
+/* Заполнить селект классов */
+function fillClassSelect(){
+  classSelect.innerHTML = "";
+  const classes = Object.keys(scheduleData);
+  classes.forEach((cl,i)=>{
+    const opt = document.createElement("option");
+    opt.value = cl; opt.textContent = cl;
+    classSelect.appendChild(opt);
+  });
+  // если есть классы — выбрать первый
+  if (classes.length) {
+    classSelect.value = classes[0];
+  }
+}
+
+/* =========== ЗАГРУЗКА ДАННЫХ =========== */
+
+async function loadData({showSkeleton=true} = {}){
+  // Показываем skeleton
+  skeleton.classList.remove("hidden");
+  scheduleContainer.innerHTML = "";
+  messageEl.classList.add("hidden");
+  if (showSkeleton) skeleton.classList.remove("hidden");
+
+  updateOnlineStatus();
+
+  try {
+    const res = await fetch(CSV_URL, {cache: "no-store"});
+    if (!res.ok) throw new Error("Ошибка при загрузке таблицы: " + res.status);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    buildScheduleFromGrid(rows);
+    fillClassSelect();
+    renderSchedule();
+    skeleton.classList.add("hidden");
+    clearMessage();
+    // Кеширование в localStorage для оффлайна
+    try { localStorage.setItem("schedule_cache", JSON.stringify(scheduleData)); } catch(e){}
+  } catch (err) {
+    console.error(err);
+    skeleton.classList.add("hidden");
+    // Попробуем взять из кеша
+    const cached = localStorage.getItem("schedule_cache");
+    if (cached) {
+      try {
+        scheduleData = JSON.parse(cached);
+        fillClassSelect();
+        renderSchedule();
+        showMessage("Данные загружены из локального кеша (offline).", true);
+      } catch(e){
+        showMessage("Не удалось загрузить данные (и кеш недоступен).", true);
+      }
+    } else {
+      showMessage("Не удалось загрузить таблицу. Проверьте доступность файла или подключение.", true);
+    }
+  }
+}
+
+/* =========== СОБЫТИЯ UI =========== */
+
+menuBtn.addEventListener("click", ()=>{ sideMenu.classList.add("open"); overlay.classList.add("visible"); });
+closeMenu.addEventListener("click", ()=>{ sideMenu.classList.remove("open"); overlay.classList.remove("visible"); });
+overlay.addEventListener("click", ()=>{ sideMenu.classList.remove("open"); overlay.classList.remove("visible"); aboutModal.classList.add("hidden"); });
+
+aboutBtn.addEventListener("click", ()=>{ aboutModal.classList.remove("hidden"); overlay.classList.add("visible"); });
+closeAbout.addEventListener("click", ()=>{ aboutModal.classList.add("hidden"); overlay.classList.remove("visible"); });
+
+classSelect.addEventListener("change", ()=> renderSchedule());
+daySelect.addEventListener("change", ()=> renderSchedule());
+searchInput.addEventListener("input", ()=> renderSchedule());
+
+refreshBtn.addEventListener("click", ()=> {
+  loadData({showSkeleton:true});
+});
+todayBtn.addEventListener("click", ()=> {
+  const t = getTodayShort();
+  // Если сегодня — вс (воскресенье) — выбираем пн (или оставим all)
+  if (t === "вс") {
+    daySelect.value = "all";
+  } else {
+    // если у селекта нет такой опции, поставим all
+    const opt = Array.from(daySelect.options).find(o=>o.value===t);
+    if (opt) daySelect.value = t; else daySelect.value = "all";
+  }
+  renderSchedule();
+});
+
+/* Online/offline */
+window.addEventListener("online", updateOnlineStatus);
+window.addEventListener("offline", updateOnlineStatus);
+
+/* При загрузке страницы */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  updateOnlineStatus();
+  await loadData();
+});
+
+
+  </script>
+</body>
+</html>
