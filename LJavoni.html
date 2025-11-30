@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Javoni — О нас</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Styles -->
+
+  <style>
+:root{
+  --bg: #0f1720;         /* very dark */
+  --panel: #0b2b20;      /* dark green panel */
+  --accent: #14b58b;     /* green accent */
+  --muted: #a7b2aa;      /* muted text */
+  --card-bg: rgba(255,255,255,0.03);
+  --glass: rgba(255,255,255,0.04);
+  --radius: 14px;
+  --container-padding: 16px;
+  --fw-medium: 600;
+  --transition: 300ms cubic-bezier(.2,.9,.3,1);
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg), #071018 120%);
+  color:#e6efe9;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding: 18px var(--container-padding);
+}
+
+/* Topbar */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:40;
+  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(11,43,32,0.65), rgba(11,43,32,0.35));
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.topbar-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand{display:flex; align-items:center; gap:12px}
+.logo{
+  width:44px; height:44px; border-radius:10px; object-fit:cover;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.03);
+}
+.site-title{
+  font-size:18px; margin:0; letter-spacing:0.4px; font-weight:700;
+}
+
+/* Menu button */
+.menu-btn{
+  background:transparent;
+  border:0;
+  color:var(--accent);
+  font-size:22px;
+  padding:10px;
+  border-radius:10px;
+  transition: transform var(--transition), background var(--transition);
+}
+.menu-btn:active{ transform:scale(.98)}
+.menu-btn:hover{ background:rgba(255,255,255,0.02)}
+
+/* Overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background: rgba(2,6,7,0.5);
+  backdrop-filter: blur(6px);
+  z-index:30;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity var(--transition);
+}
+
+/* Side menu */
+.side-menu{
+  position:fixed;
+  right:0;
+  top:0;
+  height:100vh;
+  width:320px;
+  max-width:90%;
+  background: linear-gradient(180deg, rgba(9,33,25,0.98), rgba(6,20,17,0.98));
+  box-shadow: -20px 40px 80px rgba(2,6,7,0.6);
+  padding:22px;
+  transform: translateX(110%);
+  z-index:45;
+  transition: transform var(--transition);
+  border-top-left-radius:18px;
+  border-bottom-left-radius:18px;
+  overflow:auto;
+}
+
+/* When open */
+.side-menu.open{ transform: translateX(0); }
+.overlay.show{ opacity:1; pointer-events:auto; }
+
+/* Close */
+.close-btn{
+  background:transparent; border:0; color:var(--muted); font-size:20px;
+  float:right; padding:6px;
+}
+
+/* Menu list */
+.menu-list{ list-style:none; padding:18px 0 60px 0; margin:0; display:flex; flex-direction:column; gap:12px;}
+.menu-item{
+  display:flex; align-items:center; gap:14px;
+  text-decoration:none;
+  padding:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:12px;
+  transition: transform var(--transition), box-shadow var(--transition);
+  color:inherit;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  border:1px solid rgba(255,255,255,0.02);
+}
+.menu-item:focus, .menu-item:hover{
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 14px 30px rgba(6,20,17,0.6);
+}
+.menu-icon i, .chevron{ color:var(--accent); font-size:18px }
+.menu-text{ flex:1; text-align:left }
+.menu-title{ display:block; font-weight:600; }
+.menu-sub{ display:block; font-size:12px; color:var(--muted); margin-top:2px }
+
+/* Main hero */
+.hero{
+  padding: 44px 0;
+}
+.hero-inner{
+  display:flex; flex-direction:column; gap:12px;
+  align-items:flex-start;
+}
+.hero-title{
+  margin:0;
+  font-size:34px;
+  line-height:1;
+  letter-spacing: -0.6px;
+  color: #e8f6ef;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+.hero-text{
+  margin:8px 0 0 0; max-width:800px;
+  color:var(--muted);
+  font-size:15.5px;
+}
+
+/* Cards */
+.cards{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:18px;
+  margin:28px auto 80px;
+}
+.card{
+  background: var(--card-bg);
+  padding:18px;
+  border-radius:14px;
+  box-shadow: 0 8px 28px rgba(2,6,7,0.6);
+  border:1px solid rgba(255,255,255,0.02);
+  transition: transform var(--transition), box-shadow var(--transition);
+  transform: translateY(20px);
+  opacity:0;
+}
+.card.appear.visible{
+  transform: translateY(0);
+  opacity:1;
+}
+.card-icon{ font-size:26px; color:var(--accent); margin-bottom:10px; }
+.card-title{ margin:0 0 6px 0; font-size:18px; font-weight:700; }
+.card-desc{ margin:0; color:var(--muted); font-size:14px; }
+
+/* Footer */
+.site-footer{
+  padding:18px 0;
+  border-top:1px solid rgba(255,255,255,0.02);
+  color:var(--muted);
+}
+
+/* Responsive */
+@media (max-width:900px){
+  .cards{ grid-template-columns: repeat(2,1fr) }
+  .hero-title{ font-size:28px }
+}
+@media (max-width:600px){
+  .container{ padding:14px }
+  .cards{ grid-template-columns:1fr; gap:14px }
+  .menu-btn{ font-size:20px; padding:8px }
+  .site-title{ font-size:16px }
+  .logo{ width:38px; height:38px }
+}
+
+/* small accessible focus */
+.menu-item:focus{ outline: 3px solid rgba(20,181,139,0.12); outline-offset:2px; border-color: rgba(20,181,139,0.12) }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <img src="https://dorosfamd.com/logof.png" alt="Javoni logo" class="logo" />
+        <h1 class="site-title">Javoni</h1>
+      </div>
+
+      <button id="menuBtn" class="menu-btn" aria-label="Открыть меню">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Side Menu + Overlay -->
+  <div id="overlay" class="overlay" hidden></div>
+
+  <nav id="sideMenu" class="side-menu" aria-hidden="true">
+    <button id="closeMenu" class="close-btn" aria-label="Закрыть меню"><i class="fas fa-times"></i></button>
+
+    <ul class="menu-list">
+      <li>
+        <a class="menu-item" href="tel:876619999">
+          <i class="fas fa-phone"></i>
+          <div class="menu-text">
+            <span class="menu-title">Связаться с нами</span>
+            <small class="menu-sub">876619999</small>
+          </div>
+          <i class="fas fa-arrow-right chevron"></i>
+        </a>
+      </li>
+
+      <li>
+        <a class="menu-item" href="https://dorosfamd.com" target="_blank" rel="noreferrer">
+          <i class="fas fa-globe"></i>
+          <div class="menu-text">
+            <span class="menu-title">Другие проекты</span>
+            <small class="menu-sub">dorosfamd.com</small>
+          </div>
+          <i class="fas fa-arrow-right chevron"></i>
+        </a>
+      </li>
+
+      <li>
+        <a class="menu-item" href="https://famd-sn.github.io/School/rjavoni" target="_blank" rel="noreferrer">
+          <i class="fas fa-calendar-alt"></i>
+          <div class="menu-text">
+            <span class="menu-title">Расписание</span>
+            <small class="menu-sub">rjavoni</small>
+          </div>
+          <i class="fas fa-arrow-right chevron"></i>
+        </a>
+      </li>
+
+      <li>
+        <a class="menu-item" href="https://famd-sn.github.io/School/dzjavoni" target="_blank" rel="noreferrer">
+          <i class="fas fa-book"></i>
+          <div class="menu-text">
+            <span class="menu-title">Домашние задания</span>
+            <small class="menu-sub">dzjavoni</small>
+          </div>
+          <i class="fas fa-arrow-right chevron"></i>
+        </a>
+      </li>
+
+      <li>
+        <a class="menu-item" href="https://famd-sn.github.io/School/jjavoni" target="_blank" rel="noreferrer">
+          <i class="fas fa-file-alt"></i>
+          <div class="menu-text">
+            <span class="menu-title">Журналы</span>
+            <small class="menu-sub">jjavoni</small>
+          </div>
+          <i class="fas fa-arrow-right chevron"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <h2 class="hero-title">О НАС</h2>
+        <p class="hero-text">
+          Javoni — современная школа, создающая лучшие условия для обучения, развития и творчества учащихся.
+        </p>
+        <p class="hero-subtext">Здесь можно добавить больше описания.</p>
+      </div>
+    </section>
+
+    <section class="cards container">
+      <article class="card appear" >
+        <div class="card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+        <h3 class="card-title"><a href="https://famd-sn.github.io/School/pjavoni">Преподаватели</a></h3>
+        <p class="card-desc">Опытные педагоги, современные методики.</p>
+      </article>
+
+      <article class="card appear">
+        <div class="card-icon"><i class="fas fa-users"></i></div>
+        <h3 class="card-title">Сообщество</h3>
+        <p class="card-desc">Теплая атмосфера и поддержка учеников.</p>
+      </article>
+
+      <article class="card appear">
+        <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
+        <h3 class="card-title">Достижения</h3>
+        <p class="card-desc">Участие в конкурсах и проекты.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>©2025 Javoni — Все права защищены.</small>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+// Простая логика для открытия/закрытия меню и анимации появления карточек
+
+const menuBtn = document.getElementById('menuBtn');
+const sideMenu = document.getElementById('sideMenu');
+const overlay = document.getElementById('overlay');
+const closeMenu = document.getElementById('closeMenu');
+
+function openMenu(){
+  sideMenu.classList.add('open');
+  sideMenu.setAttribute('aria-hidden', 'false');
+  overlay.classList.add('show');
+  overlay.hidden = false;
+  overlay.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden'; // блокируем прокрутку фона
+}
+
+function closeMenuFn(){
+  sideMenu.classList.remove('open');
+  sideMenu.setAttribute('aria-hidden', 'true');
+  overlay.classList.remove('show');
+  // плавно скрываем overlay, затем скрываем элемент
+  setTimeout(()=> {
+    overlay.hidden = true;
+    document.body.style.overflow = ''; // возвращаем прокрутку
+  }, 300);
+}
+
+menuBtn.addEventListener('click', openMenu);
+closeMenu.addEventListener('click', closeMenuFn);
+overlay.addEventListener('click', closeMenuFn);
+
+// Закрытие по Esc
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && sideMenu.classList.contains('open')){
+    closeMenuFn();
+  }
+});
+
+/* Плавное появление карточек при скролле (IntersectionObserver) */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const appears = document.querySelectorAll('.appear');
+  const io = new IntersectionObserver((entries, observer)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  appears.forEach(el => io.observe(el));
+});
+
+/* Небольшая анимация для кнопок меню (для касания) */
+document.querySelectorAll('.menu-item').forEach(item=>{
+  item.addEventListener('touchstart', ()=> item.classList.add('touched'));
+  item.addEventListener('touchend', ()=> item.classList.remove('touched'));
+});
+  </script>
+</body>
+</html>
